@@ -60,8 +60,22 @@ namespace Workshell.PE
         public static async Task<PortableExecutableImage> FromFileAsync(string fileName)
         {
             var file = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-            
+
             return await FromStreamAsync(file).ConfigureAwait(false);
+        }
+
+        public static PortableExecutableImage FromBytes(byte[] bytes)
+        {
+            var stream = new MemoryStream(bytes);
+
+            return FromStream(stream);
+        }
+
+        public static async Task<PortableExecutableImage> FromBytesAsync(byte[] bytes)
+        {
+            var stream = new MemoryStream(bytes);
+
+            return await FromStreamAsync(stream).ConfigureAwait(false);
         }
 
         public static PortableExecutableImage FromStream(Stream stream, bool ownStream = true)
@@ -88,7 +102,7 @@ namespace Workshell.PE
         public static async Task<bool> IsValidAsync(string fileName)
         {
             var file = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-            
+
             return await IsValidAsync(file).ConfigureAwait(false);
         }
 
@@ -98,7 +112,7 @@ namespace Workshell.PE
         }
 
         public static async Task<bool> IsValidAsync(Stream stream, bool ownStream = true)
-        {     
+        {
             try
             {
                 using (var image = await PortableExecutableImage.FromStreamAsync(stream, ownStream).ConfigureAwait(false))
@@ -178,12 +192,12 @@ namespace Workshell.PE
             }
 
             if (dosHeader.e_lfanew >= (256 * (1024 * 1024)))
-            { 
+            {
                 throw new PortableExecutableImageException(this, "New header location specified in MS-DOS header is beyond 256mb boundary (see RtlImageNtHeaderEx).");
             }
 
             if (dosHeader.e_lfanew % 4 != 0)
-            { 
+            {
                 throw new PortableExecutableImageException(this, "New header location specified in MS-DOS header is not properly aligned.");
             }
 
